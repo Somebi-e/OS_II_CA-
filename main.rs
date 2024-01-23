@@ -2,8 +2,8 @@
 #![no_main]
 
 mod writer;
-use writer::FrameBufferWriter;
 use bootloader_api::config::Mapping;
+use writer::FrameBufferWriter;
 use x86_64::instructions::hlt;
 //Use the entry_point macro to register the entry point function:bootloader_api::entry_point!(kernel_main);
 //optionally pass a custom config
@@ -18,19 +18,25 @@ fn my_entry_point(boot_info: &'static mut bootloader_api::BootInfo) -> ! {
     let frame_buffer_info = boot_info.framebuffer.as_mut().unwrap().info();
     let buffer = boot_info.framebuffer.as_mut().unwrap().buffer_mut();
     let mut frame_buffer_writer = FrameBufferWriter::new(buffer, frame_buffer_info);
-        //CA1
-        macro_rules! print{
+    //CA1
+    macro_rules! print{
             ($($arg:tt)*)=> ({use core::fmt::Write;
             let _ = write!
         (frame_buffer_writer,$($arg)*);
     });
         }
 
-    use core::fmt::Write;//below requires this
-    writeln!(frame_buffer_writer, "Testing testing {} and {}", 1, 4.0/2.0).unwrap();
+    // use core::fmt::Write; //below requires this
+    // writeln!(
+    //     frame_buffer_writer,
+    //     "Testing testing {} and {}",
+    //     1,
+    //     4.0 / 2.0
+    // )
+    // .unwrap();
     print!("hi finally did it with print! macro\n");
-    //this sets the cursor
-    frame_buffer_writer.set_x_pos(25);
+    // //this sets the cursor
+    frame_buffer_writer.set_pos(25, 100);
     print!("my cursor has been adjusted");
     loop {
         hlt(); //stop x86_64 from being unnecessarily busy while looping
